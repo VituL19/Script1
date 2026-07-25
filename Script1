@@ -1,0 +1,197 @@
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "VelocidadePuloUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- valores
+local velocidade = 16
+local pulo = 7
+local passo = 1
+
+-- função aplicar
+local function aplicar()
+	local char = player.Character
+	if char and char:FindFirstChild("Humanoid") then
+		local hum = char.Humanoid
+		hum.WalkSpeed = velocidade
+		hum.UseJumpPower = false
+		hum.JumpHeight = pulo
+	end
+end
+
+-- frame principal
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromScale(0.35, 0.6)
+frame.Position = UDim2.fromScale(0.05, 0.2)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,15)
+
+-- ===== SISTEMA DE ARRASTAR (FLUTUANTE) =====
+local dragging = false
+local dragStart
+local startPos
+
+frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+	or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- função criar botão
+local function criarBotao(texto, pos, cor)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.fromScale(0.18, 0.12)
+	b.Position = pos
+	b.Text = texto
+	b.TextScaled = true
+	b.Font = Enum.Font.GothamBold
+	b.TextColor3 = Color3.new(1,1,1)
+	b.BackgroundColor3 = cor
+	b.Parent = frame
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+	return b
+end
+
+-- ===== PULO =====
+local puloTitulo = Instance.new("TextLabel")
+puloTitulo.Size = UDim2.fromScale(1,0.1)
+puloTitulo.Text = "PULO"
+puloTitulo.TextScaled = true
+puloTitulo.Font = Enum.Font.GothamBold
+puloTitulo.TextColor3 = Color3.new(1,1,1)
+puloTitulo.BackgroundTransparency = 1
+puloTitulo.Parent = frame
+
+local puloValor = Instance.new("TextLabel")
+puloValor.Size = UDim2.fromScale(0.4,0.1)
+puloValor.Position = UDim2.fromScale(0.3,0.1)
+puloValor.Text = tostring(pulo)
+puloValor.TextScaled = true
+puloValor.Font = Enum.Font.Gotham
+puloValor.TextColor3 = Color3.new(1,1,1)
+puloValor.BackgroundTransparency = 1
+puloValor.Parent = frame
+
+local puloMenos = criarBotao("-", UDim2.fromScale(0.05,0.1), Color3.fromRGB(150,0,0))
+local puloMais  = criarBotao("+", UDim2.fromScale(0.77,0.1), Color3.fromRGB(0,150,0))
+
+-- ===== VELOCIDADE =====
+local velTitulo = Instance.new("TextLabel")
+velTitulo.Size = UDim2.fromScale(1,0.1)
+velTitulo.Position = UDim2.fromScale(0,0.35)
+velTitulo.Text = "VELOCIDADE"
+velTitulo.TextScaled = true
+velTitulo.Font = Enum.Font.GothamBold
+velTitulo.TextColor3 = Color3.new(1,1,1)
+velTitulo.BackgroundTransparency = 1
+velTitulo.Parent = frame
+
+local velValor = Instance.new("TextLabel")
+velValor.Size = UDim2.fromScale(0.4,0.1)
+velValor.Position = UDim2.fromScale(0.3,0.45)
+velValor.Text = tostring(velocidade)
+velValor.TextScaled = true
+velValor.Font = Enum.Font.Gotham
+velValor.TextColor3 = Color3.new(1,1,1)
+velValor.BackgroundTransparency = 1
+velValor.Parent = frame
+
+local velMenos = criarBotao("-", UDim2.fromScale(0.05,0.45), Color3.fromRGB(150,0,0))
+local velMais  = criarBotao("+", UDim2.fromScale(0.77,0.45), Color3.fromRGB(0,150,0))
+
+-- ===== QUANTO POR VEZ =====
+local passoTexto = Instance.new("TextLabel")
+passoTexto.Size = UDim2.fromScale(0.6,0.1)
+passoTexto.Position = UDim2.fromScale(0.05,0.75)
+passoTexto.Text = "quanto por vez?"
+passoTexto.TextScaled = true
+passoTexto.Font = Enum.Font.Gotham
+passoTexto.TextColor3 = Color3.new(1,1,1)
+passoTexto.BackgroundTransparency = 1
+passoTexto.Parent = frame
+
+local passoBox = Instance.new("TextBox")
+passoBox.Size = UDim2.fromScale(0.25,0.1)
+passoBox.Position = UDim2.fromScale(0.7,0.75)
+passoBox.Text = "1"
+passoBox.TextScaled = true
+passoBox.Font = Enum.Font.Gotham
+passoBox.BackgroundColor3 = Color3.fromRGB(40,40,40)
+passoBox.TextColor3 = Color3.new(1,1,1)
+passoBox.ClearTextOnFocus = false
+passoBox.Parent = frame
+Instance.new("UICorner", passoBox).CornerRadius = UDim.new(0,8)
+
+passoBox.FocusLost:Connect(function()
+	local valor = tonumber(passoBox.Text)
+	if valor and valor > 0 then
+		passo = valor
+	else
+		passoBox.Text = tostring(passo)
+	end
+end)
+
+-- ===== EVENTOS =====
+puloMais.MouseButton1Click:Connect(function()
+	pulo += passo
+	puloValor.Text = tostring(pulo)
+	aplicar()
+end)
+
+puloMenos.MouseButton1Click:Connect(function()
+	if pulo - passo > 0 then
+		pulo -= passo
+		puloValor.Text = tostring(pulo)
+		aplicar()
+	end
+end)
+
+velMais.MouseButton1Click:Connect(function()
+	velocidade += passo
+	velValor.Text = tostring(velocidade)
+	aplicar()
+end)
+
+velMenos.MouseButton1Click:Connect(function()
+	if velocidade - passo > 0 then
+		velocidade -= passo
+		velValor.Text = tostring(velocidade)
+		aplicar()
+	end
+end)
+
+player.CharacterAdded:Connect(function()
+	task.wait(0.2)
+	aplicar()
+end)
